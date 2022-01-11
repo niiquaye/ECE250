@@ -85,7 +85,7 @@ int Array<Type>::size() const {
 
 template <typename Type>
 int Array<Type>::capacity() const {
-    return 0;
+    return array_capacity;
 }
 
 /*
