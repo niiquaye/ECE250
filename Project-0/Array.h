@@ -11,6 +11,7 @@
 #include <iostream>
 #include <cmath>
 #include "Exception.h"
+#include "ece250.h"
 
 template <typename Type>
 class Array {
@@ -51,7 +52,6 @@ Array<Type>::Array( int n ):
 array_capacity( std::max( n, 1 ) ),
 internal_array( new Type[capacity()] ),
 array_size( 0 ) {
-	// does nothing
 }
 
 
@@ -63,6 +63,7 @@ array_size( 0 ) {
 
 template <typename Type>
 Array<Type>::~Array() {
+    delete [] internal_array;
 }
 
 /*
@@ -73,7 +74,7 @@ Array<Type>::~Array() {
 
 template <typename Type>
 int Array<Type>::size() const {
-    return 0;
+    return array_size;
 }
 
 /*
@@ -96,7 +97,7 @@ int Array<Type>::capacity() const {
 
 template <typename Type>
 bool Array<Type>::empty() const {
-	return 0;
+	return (array_size == 0) ? true : false ;
 }
 
 /*
@@ -108,7 +109,7 @@ bool Array<Type>::empty() const {
 
 template <typename Type>
 bool Array<Type>::full() const {
-	return 0;
+	return (array_size == array_capacity) ? true : false;
 }
 
 /*
@@ -121,7 +122,15 @@ bool Array<Type>::full() const {
 
 template <typename Type>
 Type Array<Type>::operator[]( int n ) const {
-	return 0;
+    if( n >= 0 && n < Array<Type>::size()){
+        return internal_array[n];
+    }
+    else if (n < 0){
+        throw underflow();
+    }
+    else{
+        throw overflow();
+    }
 }
 
 /*
@@ -135,7 +144,17 @@ Type Array<Type>::operator[]( int n ) const {
 
 template <typename Type>
 bool Array<Type>::append( Type const &obj ) {
-	return false;
+   // check if array is full
+    if(Array<Type>::full()){
+        return false;
+    }
+    
+    // add new element into array and increment array_size
+    internal_array[array_size] = std::move(obj);
+    array_size++;
+
+    return true;
+
 }
 
 /*
@@ -150,7 +169,8 @@ bool Array<Type>::append( Type const &obj ) {
 
 template <typename Type>
 void Array<Type>::clear() {
-	return;
+    if(array_size == 0) return;
+	array_size = 0;
 }
 
 /*
