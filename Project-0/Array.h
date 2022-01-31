@@ -52,6 +52,7 @@ Array<Type>::Array( int n ):
 array_capacity( std::max( n, 1 ) ),
 internal_array( new Type[capacity()] ),
 array_size( 0 ) {
+    std::cout << "heyyyyy" << std::endl;
 }
 
 
