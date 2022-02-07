@@ -1,9 +1,9 @@
 /*****************************************
- * UW User ID:  uwuserid
+ * UW User ID:  omarmon
  * Submitted for ECE 250
  * Department of Electrical and Computer Engineering
  * University of Waterloo
- * Calender Term of Submission:  (Winter|Spring|Fall) 20NN
+ * Calender Term of Submission:  (Winter) 2022
  *
  * By submitting this file, I affirm that
  * I am the author of all modifications to
@@ -168,13 +168,13 @@ bool Double_sentinel_list<Type>::empty() const {
 
 template <typename Type>
 Type Double_sentinel_list<Type>::front() const {
-    if(list_head->next()){ return list_head->next()->value();}
+    if(list_head->next() && list_size != 0){ return list_head->next()->value();}
     else{ throw underflow(); } /*else clause not really needed but oh well*/
 }
 
 template <typename Type>
 Type Double_sentinel_list<Type>::back() const {
-    if(list_tail->previous()) {return list_tail->previous()->value();}
+    if(list_tail->previous() && list_size != 0) {return list_tail->previous()->value();}
     else{ throw underflow(); }
 }
 
@@ -185,7 +185,7 @@ typename Double_sentinel_list<Type>::Double_node *Double_sentinel_list<Type>::be
 
 template <typename Type>
 typename Double_sentinel_list<Type>::Double_node *Double_sentinel_list<Type>::end() const {
-	return list_tail; // return one past the end of the list ... aka the sentinel tail node itself
+	return list_tail; // return one past the end of the list ... aka the sentinel tail node itself //TODO
 }
 
 template <typename Type>
@@ -358,27 +358,6 @@ int Double_sentinel_list<Type>::erase( Type const &obj ) {
     int deletion_count{0};
 
     /*
-     * Simply pop back or pop front the node if data is in head or tail
-     *
-     * */
-    bool value_in_head {false};
-    bool value_in_tail{false};
-
-    while( (list_head->next_node && (value_in_head = (list_head->next_node->value() == obj)))
-            || (list_tail->previous_node && (value_in_tail = (list_tail->previous_node->value() == obj))) ){
-         
-        if(value_in_head){
-           this->pop_front();
-           deletion_count++;
-        }
-
-        if(value_in_tail){
-           this->pop_back();
-           deletion_count++;
-        }
-    }
-
-    /*
      * Delete node if it is in the middle of the list
      *
      * */
@@ -386,13 +365,16 @@ int Double_sentinel_list<Type>::erase( Type const &obj ) {
     {
         if(current){
             if(current->value() == obj){
-
+              
+              std::cout << "hello" << std::endl;
               // found node to delete node
               
               typename Double_sentinel_list<Type>::Double_node* deletion_node {current};
 
               current->previous_node->next_node = current->next_node;
               current->next_node->previous_node = current->previous_node;
+
+              current = current->previous();
 
               delete deletion_node;
               deletion_count++;
@@ -402,7 +384,10 @@ int Double_sentinel_list<Type>::erase( Type const &obj ) {
         }
        
     }
-
+    
+    //if(deletion_count != 0) { list_size -= deletion_count; }
+    //this->list_size -= deletion_count;
+    list_size = list_size - deletion_count;
     return deletion_count;
 
 }
