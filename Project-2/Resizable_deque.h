@@ -12,6 +12,7 @@
 #define DYNAMIC_DEQUE_H
 
 #include "Exception.h"
+#include <bits/c++config.h>
 #include <cstddef>
 #include <iostream>
 
@@ -42,14 +43,15 @@ class Resizable_deque {
 		// Your member variables
 
         std::size_t m_front {};
-		std::size_t m_back {};
+		int m_back {};
 		std::size_t m_size {};
 	    //std::size_t m_initCap{};
 		std::size_t m_cap {};
-
+        std::size_t m_initCap {};
 		// Any private member functions
 		//   - helper functions for resizing your array?
         Type* deque;
+        void double_capacity();
 
         
 	// Friends
@@ -70,10 +72,11 @@ class Resizable_deque {
 template <typename Type>
 Resizable_deque<Type>::Resizable_deque( int n = 16 ):
 m_cap((n >= 16)? n : 16),
+m_initCap(m_cap),
 deque(new Type[m_cap]),
 m_size(0),
-m_front(0),
-m_back(0)
+m_front(m_cap),
+m_back(-1)
 {
 
 }
@@ -126,7 +129,7 @@ bool Resizable_deque<Type>::empty() const {
 template <typename  Type>
 Type Resizable_deque<Type>::front() const {
 	// Enter your implementation here
-    if(!this->empty() && m_front >= 0)
+    if(!this->empty() && m_front > 0)
     	return deque[m_front];
     else 
         throw underflow();
@@ -135,7 +138,7 @@ Type Resizable_deque<Type>::front() const {
 template <typename  Type>
 Type Resizable_deque<Type>::back() const {
 	// Enter your implementation here
-    if(!this->empty() && m_back >= 0)
+    if(!this->empty() && m_back > 0)
 	   return deque[m_back];
     else 
         throw underflow();
@@ -171,11 +174,13 @@ void Resizable_deque<Type>::push_front( Type const &obj ) {
 	// Enter your implementation here
     if(this->m_size == this->m_cap){
         // array needs to be doubled
-   }
+        this->double_capacity();
+    }
 
+    this->m_front--; 
+    deque[this->m_front] = obj;
     this->m_size++;
-    deque[this->m_size] = obj;
-    m_front = m_size;
+
 }
 
 template <typename Type>
@@ -183,11 +188,12 @@ void Resizable_deque<Type>::push_back( Type const &obj ) {
 	// Enter your implementation here
     if(this->m_size == this->m_cap){
         // array needs to be doubled
+        this->double_capacity();
     }
-
+    
+    this->m_back++;
+    deque[this->m_back] = obj;
     this->m_size++;
-    deque[this->m_size] = obj;
-    m_back = m_size;
 
 
 }
@@ -195,11 +201,32 @@ void Resizable_deque<Type>::push_back( Type const &obj ) {
 template <typename Type>
 void Resizable_deque<Type>::pop_front() {
 	// Enter your implementation here
+    
+    if(this->empty()) throw underflow{};
+
+    
+    this->m_front++;
+    this->m_size--;
+
+    if(this->m_size <= this->m_cap/4 && this->m_cap/2 >= this->m_initCap){
+      // half the array
+    }
+
 }
 
 template <typename Type>
 void Resizable_deque<Type>::pop_back() {
 	// Enter your implementation here
+    if(this->empty()) throw underflow{};
+
+    
+    this->m_back--;
+    this->m_size--;
+
+    if(this->m_size <= this->m_cap/4 && this->m_cap/2 >= this->m_initCap){
+      // half the array
+    }
+
 }
 
 template <typename Type>
@@ -212,6 +239,25 @@ void Resizable_deque<Type>::clear() {
 
 // Enter any private member functions (helper functions) here
 
+template<typename Type>
+void Resizable_deque<Type>::double_capacity(){
+     
+    // allocate new array
+    Type* new_array = new Type[this->m_cap*2];
+    // elements [i] = old[(i+front)% old_capacity]
+
+    for(std::size_t i{0}; i < this->m_size; i++){
+        new_array[i] = deque[(i+this->m_front)%this->m_cap]; 
+    }
+
+    Type* deletion_ptr = this->deque;
+    delete [] deletion_ptr;
+    deletion_ptr = nullptr;
+
+    this->deque = new_array;
+    this->m_cap *= 2;
+     
+}
 
 /////////////////////////////////////////////////////////////////////////
 //                               Friends                               //

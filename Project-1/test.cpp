@@ -24,10 +24,13 @@ int main() {
     list.push_front(10);
     list.push_back(15);
     list.push_back(18);
-    std::cout<< list.count(15);
+    std::cout<< list.count(15) << "number of elements found from 'count'"<< std::endl;
     std::cout << "-------------"<< std::endl;
 
-    std::cout<<list.erase(18);
+    std::cout<<list.erase(15);
+    std::cout<<list.erase(10);
+
+    list.push_back(27);
 
 
     std::cout << list << std::endl;

@@ -5,6 +5,9 @@
  * University of Waterloo
  * Calender Term of Submission:  (Winter) 2022
  *
+ * Name: Orson Marmon
+ * ID #: 20818919
+ *
  * By submitting this file, I affirm that
  * I am the author of all modifications to
  * the provided code.
@@ -94,7 +97,6 @@ list_size(0)
      * Set head and tail to point to each other on construction
      */ 
 
-    std::cout << "constructor" <<std::endl;
 	list_head->next_node = list_tail;
     list_head->previous_node = nullptr;
 
@@ -109,7 +111,6 @@ list_head( new typename Double_sentinel_list<Type>::Double_node {} ),
 list_tail( new typename Double_sentinel_list<Type>::Double_node {} ),
 list_size(list.size())
 {
-    std::cout << "copy constructor" << std::endl;
 	list_head->next_node = list_tail;
     list_head->previous_node = nullptr;
 
@@ -255,7 +256,6 @@ Double_sentinel_list<Type> &Double_sentinel_list<Type>::operator=( Double_sentin
 	// This is done for you
 	swap( rhs );
 
-    std::cout<<"copy assignment operator" << std::endl;
 
 	return *this;
 }
@@ -366,7 +366,6 @@ int Double_sentinel_list<Type>::erase( Type const &obj ) {
         if(current){
             if(current->value() == obj){
               
-              std::cout << "hello" << std::endl;
               // found node to delete node
               
               typename Double_sentinel_list<Type>::Double_node* deletion_node {current};
@@ -385,8 +384,6 @@ int Double_sentinel_list<Type>::erase( Type const &obj ) {
        
     }
     
-    //if(deletion_count != 0) { list_size -= deletion_count; }
-    //this->list_size -= deletion_count;
     list_size = list_size - deletion_count;
     return deletion_count;
 
