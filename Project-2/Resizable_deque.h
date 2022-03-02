@@ -135,7 +135,7 @@ bool Resizable_deque<Type>::empty() const {
 template <typename  Type>
 Type Resizable_deque<Type>::front() const {
 	// Enter your implementation here
-    if(!this->empty() && m_front >= 0 && m_front < m_size)
+    if(!this->empty() && m_front >= 0)
     	return deque[m_front];
     else 
         throw underflow();
@@ -144,7 +144,7 @@ Type Resizable_deque<Type>::front() const {
 template <typename  Type>
 Type Resizable_deque<Type>::back() const {
 	// Enter your implementation here
-    if(!this->empty() && m_back >= 0 && m_back < m_size)
+    if(!this->empty() && m_back >= 0)
 	   return deque[m_back];
     else{
         std::cout << "hello" << std::endl;
@@ -191,9 +191,14 @@ void Resizable_deque<Type>::push_front( Type const &obj ) {
         /*array needs to be doubled*/
         this->double_capacity();
 
-    this->m_head_index = (this->m_size == 0)? 0: this->m_head_index--;
+    //this->m_head_index = (this->m_size == 0)? 0: this->m_head_index--;
+    if(m_size == 0)
+        m_head_index = 0;
+    else 
+        m_head_index--;
+    std::cout << "head index: " << m_head_index << std::endl;
     //this->m_front--;
-    this->m_front = (this->m_size == 0)? 0 : this->m_cap - (abs(this->m_head_index) % this->m_cap) - 1;
+    this->m_front = (this->m_size == 0)? 0 : this->m_cap - (abs(this->m_head_index) % this->m_cap) ;
     this->deque[this->m_front] = obj;
     
 
@@ -225,7 +230,11 @@ void Resizable_deque<Type>::pop_front() {
     if(this->empty()) throw underflow{};
 
     this->m_head_index++; 
-    this->m_front = (this->m_front == this->m_cap-1)? 0 : this->m_front++;
+    //this->m_front = (this->m_front == this->m_cap-1)? 0 : this->m_front++;
+    if(m_front == m_cap - 1)
+        m_front = 0;
+    else 
+        m_front++;
     this->m_size--;
 
     if(this->m_size <= this->m_cap/4 && this->m_cap/2 >= this->m_initCap)
@@ -242,9 +251,14 @@ void Resizable_deque<Type>::pop_back() {
     if(this->empty()) throw underflow{};
 
     
-    this->m_back = (this->m_back == 0 )? this->m_cap - 1  : this->m_back--;
+    //this->m_back = (this->m_back == 0 )? this->m_cap - 1  : this->m_back--;
+    if(m_back == 0)
+        m_back = m_cap - 1;
+    else
+        m_back--;
     this->m_size--;
 
+    std::cout << "new tail: "<< m_back << std::endl;
     if(this->m_size <= this->m_cap/4 && this->m_cap/2 >= this->m_initCap)
       /*half the array*/
       this->half_capacity();
