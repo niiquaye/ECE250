@@ -55,6 +55,9 @@ class Resizable_deque {
         void double_capacity();
         void half_capacity();
 
+        void print();
+
+
         
 	// Friends
 
@@ -72,6 +75,8 @@ class Resizable_deque {
 /////////////////////////////////////////////////////////////////////////
 //                   Constructors and Destructors                      //
 /////////////////////////////////////////////////////////////////////////
+
+
 
 // Constructor
 template <typename Type>
@@ -147,7 +152,7 @@ Type Resizable_deque<Type>::back() const {
     if(!this->empty() && m_back >= 0)
 	   return deque[m_back];
     else{
-        std::cout << "hello" << std::endl;
+        //std::cout << "hello" << std::endl;
         throw underflow();
 
     }
@@ -196,14 +201,14 @@ void Resizable_deque<Type>::push_front( Type const &obj ) {
         m_head_index = 0;
     else 
         m_head_index--;
-    std::cout << "head index: " << m_head_index << std::endl;
+    //std::cout << "head index: " << m_head_index << std::endl;
     //this->m_front--;
     this->m_front = (this->m_size == 0)? 0 : this->m_cap - (abs(this->m_head_index) % this->m_cap) ;
     this->deque[this->m_front] = obj;
     
 
     this->m_size++;
-    std::cout << "front: " << m_front <<" "<< "back: " << m_back <<" "<< "size: " << m_size << std::endl;
+    //std::cout << "front: " << m_front <<" "<< "back: " << m_back <<" "<< "size: " << m_size << std::endl;
 }
 
 template <typename Type>
@@ -220,7 +225,7 @@ void Resizable_deque<Type>::push_back( Type const &obj ) {
 
     this->m_size++;
 
-    std::cout << "front: " << m_front <<" "<< "back: " << m_back <<" "<< "size: " << m_size << std::endl;
+    //std::cout << "front: " << m_front <<" "<< "back: " << m_back <<" "<< "size: " << m_size << std::endl;
 }
 
 template <typename Type>
@@ -241,7 +246,7 @@ void Resizable_deque<Type>::pop_front() {
       /*half the array*/
       this->half_capacity();
     
-    std::cout << "front: " << m_front <<" "<< "back: " << m_back <<" "<< "size: " << m_size << std::endl;
+    //std::cout << "front: " << m_front <<" "<< "back: " << m_back <<" "<< "size: " << m_size << std::endl;
 
 }
 
@@ -258,7 +263,7 @@ void Resizable_deque<Type>::pop_back() {
         m_back--;
     this->m_size--;
 
-    std::cout << "new tail: "<< m_back << std::endl;
+    //std::cout << "new tail: "<< m_back << std::endl;
     if(this->m_size <= this->m_cap/4 && this->m_cap/2 >= this->m_initCap)
       /*half the array*/
       this->half_capacity();
@@ -348,7 +353,13 @@ T abs (T a) {return (a < 0)? a*-1: a;}
 
 template <typename T>
 std::ostream &operator<<( std::ostream &out, Resizable_deque<T> const &list ) {
-	out << "not yet implemented";
+
+    for(auto i = 0; (list.m_front+i)%list.m_cap != list.m_back; ++i){
+        
+        out << list.deque[(list.m_front + i) % list.m_cap] << " ";
+    
+    }
+
 
 	return out;
 }

@@ -267,5 +267,6 @@ void Resizable_deque_tester<Type>::process() {
 	} else {
 		std::cout << command << ": Command not found." << std::endl;
 	}
+    std::cout << *object << std::endl;
 }
 #endif
