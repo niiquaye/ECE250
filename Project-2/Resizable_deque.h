@@ -44,6 +44,7 @@ class Resizable_deque {
 
         int m_front {};
 		int m_back {};
+        int m_head_index {};
 		std::size_t m_size {};
 	    //std::size_t m_initCap{};
 		std::size_t m_cap {};
@@ -59,6 +60,9 @@ class Resizable_deque {
 
 	template <typename T>
 	friend std::ostream &operator<<( std::ostream &, Resizable_deque<T> const & );
+
+    template<typename T>
+    friend inline T abs(T a); 
 };
 /***
  * elements [i] = old[(i+front)% old_capacity]
@@ -71,13 +75,14 @@ class Resizable_deque {
 
 // Constructor
 template <typename Type>
-Resizable_deque<Type>::Resizable_deque( int n = 16 ):
+Resizable_deque<Type>::Resizable_deque( int n /* = 16*/ ):
 m_cap((n >= 16)? n : 16),
 m_initCap(m_cap),
 deque(new Type[m_cap]),
 m_size(0),
 m_front(0),
-m_back(0)
+m_back(0),
+m_head_index(m_front)
 {
 
 }
@@ -130,7 +135,7 @@ bool Resizable_deque<Type>::empty() const {
 template <typename  Type>
 Type Resizable_deque<Type>::front() const {
 	// Enter your implementation here
-    if(!this->empty() && m_front > 0)
+    if(!this->empty() && m_front >= 0 && m_front < m_size)
     	return deque[m_front];
     else 
         throw underflow();
@@ -139,7 +144,7 @@ Type Resizable_deque<Type>::front() const {
 template <typename  Type>
 Type Resizable_deque<Type>::back() const {
 	// Enter your implementation here
-    if(!this->empty() && m_back > 0)
+    if(!this->empty() && m_back >= 0 && m_back < m_size)
 	   return deque[m_back];
     else 
         throw underflow();
@@ -149,6 +154,12 @@ template <typename Type>
 void Resizable_deque<Type>::swap( Resizable_deque<Type> &deque ) {
 	// Swap the member variables
 	//     std::swap( variable, deque.variable );
+    std::swap(this->m_size, deque.m_size);
+    std::swap(this->m_front, deque.m_front);
+    std::swap(this->m_cap, deque.m_cap);
+    std::swap(this->m_head_index, deque.m_head_index);
+
+    std::swap(this->deque, deque.deque);
 
 	// Enter your implementation here
 }
@@ -177,9 +188,9 @@ void Resizable_deque<Type>::push_front( Type const &obj ) {
         /*array needs to be doubled*/
         this->double_capacity();
 
-
-    this->m_front--;
-    this->m_front = (this->m_size == 0)? 0 : this->m_cap - (this->m_front % this->m_cap);
+    this->m_head_index = (this->m_size == 0)? 0: this->m_head_index--;
+    //this->m_front--;
+    this->m_front = (this->m_size == 0)? 0 : this->m_cap - (abs(this->m_head_index) % this->m_cap);
     this->deque[this->m_front] = obj;
     
 
@@ -210,7 +221,7 @@ void Resizable_deque<Type>::pop_front() {
     
     if(this->empty()) throw underflow{};
 
-    
+    this->m_head_index++; 
     this->m_front = (this->m_front == this->m_cap-1)? 0 : this->m_front++;
     this->m_size--;
 
@@ -264,7 +275,8 @@ void Resizable_deque<Type>::double_capacity(){
     // elements [i] = old[(i+front)% old_capacity]
 
     for(std::size_t i{0}; i < this->m_size; i++){
-        new_array[i] = deque[(i+this->m_front)%this->m_cap]; 
+        new_array[i] = deque[(this->m_front)%this->m_cap];
+        this->m_front++;
     }
 
     Type* deletion_ptr = this->deque;
@@ -274,18 +286,40 @@ void Resizable_deque<Type>::double_capacity(){
     this->deque = new_array;
     this->m_cap *= 2;
 
-    this->m_back = this->m_size
+    this->m_back = this->m_size - 1;
+    this->m_front = 0;
      
 }
 
 template<typename Type>
 void Resizable_deque<Type>::half_capacity(){
 
+    // allocate new array
+    Type* new_array = new Type[this->m_cap/2];
+
+    for(std::size_t i{0}; i < this->m_size; i++){
+        new_array[i] = deque[(this->m_front)%this->m_cap];
+        this->m_front++;
+    }
+
+    Type* deletion_ptr = this->deque;
+    delete [] deletion_ptr;
+    deletion_ptr = nullptr;
+
+    this->deque = new_array;
+    this->m_cap /= 2;
+
+    this->m_back = this->m_size - 1;
+    this->m_front = 0;
+
 }
 
 /////////////////////////////////////////////////////////////////////////
 //                               Friends                               //
 /////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+T abs (T a) {return (a < 0)? a*-1: a;} 
 
 // You can modify this function however you want:  it will not be tested
 
