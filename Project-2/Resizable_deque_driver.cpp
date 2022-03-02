@@ -17,33 +17,52 @@
 
 #include <iostream>
 #include <cstring>
+#include "Resizable_deque.h"
 #include "Tester.h"
 #include "Resizable_deque_tester.h"
 
-int main( int argc, char *argv[] ) {
-	if ( argc > 2 ) {
-		std::cerr << "Expecting at most one command-line argument" << std::endl;
 
-		return -1;
-	}
+int main(void){
+    Resizable_deque<int> list(16);
 
-	std::cout << "Starting Test Run" << std::endl;
 
-	if ( argc == 1 || !std::strcmp( argv[1], "int" ) ) {
-		if ( argc == 1 ) {
-			std::cerr << "Expecting a command-line argument of either 'int' or 'double', but got none; using 'int' by default." << std::endl;
-		}
+    list.push_front(56);
+    list.push_front(78);
+    list.push_front(90);
 
-		Resizable_deque_tester<int> tester;
+    std::cout << list.back() << std::endl;
+    list.pop_back();
+    std::cout << list.back() << std::endl;
 
-		tester.run();
-	} else if ( !std::strcmp( argv[1], "double" ) ) {
-		Resizable_deque_tester<double> tester;
 
-		tester.run();
-	}
-
-	std::cout << "Finishing Test Run" << std::endl;
-
-	return 0;
+    return 0;
 }
+
+//
+//int main( int argc, char *argv[] ) {
+//	if ( argc > 2 ) {
+//		std::cerr << "Expecting at most one command-line argument" << std::endl;
+//
+//		return -1;
+//	}
+//
+//	std::cout << "Starting Test Run" << std::endl;
+//
+//	if ( argc == 1 || !std::strcmp( argv[1], "int" ) ) {
+//		if ( argc == 1 ) {
+//			std::cerr << "Expecting a command-line argument of either 'int' or 'double', but got none; using 'int' by default." << std::endl;
+//		}
+//
+//		Resizable_deque_tester<int> tester;
+//
+//		tester.run();
+//	} else if ( !std::strcmp( argv[1], "double" ) ) {
+//		Resizable_deque_tester<double> tester;
+//
+//		tester.run();
+//	}
+//
+//	std::cout << "Finishing Test Run" << std::endl;
+//
+//	return 0;
+//}

@@ -62,7 +62,7 @@ class Resizable_deque {
 	friend std::ostream &operator<<( std::ostream &, Resizable_deque<T> const & );
 
     template<typename T>
-    friend inline T abs(T a); 
+    friend T abs(T a); 
 };
 /***
  * elements [i] = old[(i+front)% old_capacity]
@@ -146,8 +146,11 @@ Type Resizable_deque<Type>::back() const {
 	// Enter your implementation here
     if(!this->empty() && m_back >= 0 && m_back < m_size)
 	   return deque[m_back];
-    else 
+    else{
+        std::cout << "hello" << std::endl;
         throw underflow();
+
+    }
 }
 
 template <typename Type>
@@ -190,12 +193,12 @@ void Resizable_deque<Type>::push_front( Type const &obj ) {
 
     this->m_head_index = (this->m_size == 0)? 0: this->m_head_index--;
     //this->m_front--;
-    this->m_front = (this->m_size == 0)? 0 : this->m_cap - (abs(this->m_head_index) % this->m_cap);
+    this->m_front = (this->m_size == 0)? 0 : this->m_cap - (abs(this->m_head_index) % this->m_cap) - 1;
     this->deque[this->m_front] = obj;
     
 
     this->m_size++;
-
+    std::cout << "front: " << m_front <<" "<< "back: " << m_back <<" "<< "size: " << m_size << std::endl;
 }
 
 template <typename Type>
@@ -212,7 +215,7 @@ void Resizable_deque<Type>::push_back( Type const &obj ) {
 
     this->m_size++;
 
-
+    std::cout << "front: " << m_front <<" "<< "back: " << m_back <<" "<< "size: " << m_size << std::endl;
 }
 
 template <typename Type>
@@ -228,6 +231,8 @@ void Resizable_deque<Type>::pop_front() {
     if(this->m_size <= this->m_cap/4 && this->m_cap/2 >= this->m_initCap)
       /*half the array*/
       this->half_capacity();
+    
+    std::cout << "front: " << m_front <<" "<< "back: " << m_back <<" "<< "size: " << m_size << std::endl;
 
 }
 
@@ -269,7 +274,9 @@ void Resizable_deque<Type>::clear() {
 
 template<typename Type>
 void Resizable_deque<Type>::double_capacity(){
-     
+    
+    std::cout << "double cap" << std::endl;
+
     // allocate new array
     Type* new_array = new Type[this->m_cap*2];
     // elements [i] = old[(i+front)% old_capacity]
@@ -293,6 +300,8 @@ void Resizable_deque<Type>::double_capacity(){
 
 template<typename Type>
 void Resizable_deque<Type>::half_capacity(){
+
+    std::cout << "half cap" << std::endl;
 
     // allocate new array
     Type* new_array = new Type[this->m_cap/2];
