@@ -313,7 +313,7 @@ void Resizable_deque<Type>::double_capacity(){
     this->m_cap *= 2;
 
     this->m_back = this->m_size - 1;
-    this->m_front = 0;
+    this->m_front = 0; this->m_head_index = 0;
      
 }
 
@@ -354,11 +354,14 @@ T abs (T a) {return (a < 0)? a*-1: a;}
 template <typename T>
 std::ostream &operator<<( std::ostream &out, Resizable_deque<T> const &list ) {
 
-    for(auto i = 0; (list.m_front+i)%list.m_cap != list.m_back; ++i){
-        
-        out << list.deque[(list.m_front + i) % list.m_cap] << " ";
-    
-    }
+   // for(auto i = 0; (list.m_front+i)%list.m_cap != list.m_back; ++i){
+   //     
+   //     out << list.deque[(list.m_front + i) % list.m_cap] << " ";
+   // 
+   // }
+
+    for(auto i = 0; i < list.m_cap; i++)
+        out << list.deque[i] << " ";
 
 
 	return out;
