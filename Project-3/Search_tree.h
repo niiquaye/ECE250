@@ -1,4 +1,5 @@
 /*****************************************
+ *
  * UW User ID:  uwuserid
  * Submitted for ECE 250
  * Semester of Submission:  (Winter|Spring|Fall) 20NN
@@ -101,6 +102,7 @@ class Search_tree {
 		bool insert( Type const & );
 		bool erase( Type const & );
 
+        void balance();
 	// Friends
 
 	template <typename T>

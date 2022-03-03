@@ -15,7 +15,7 @@
 #include <bits/c++config.h>
 #include <cstddef>
 #include <iostream>
-
+//ii
 template <typename Type>
 class Resizable_deque {
 	public:
