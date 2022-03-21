@@ -47,9 +47,18 @@ class Search_tree {
 				Node *back();
 				Node *find( Type const &obj );
 
+                int balanceFactor() const;
+
 				void clear();
 				bool insert( Type const &obj, Node *&to_this );
 				bool erase( Type const &obj, Node *&to_this );
+
+            private:
+                // Balance AVL 
+                void balance(Node*& curr_node);
+                void rotateRight(Node*& curr_node);
+                void rotateLeft(Node*& curr_node);
+
 		};
 
 		Node *root_node;
@@ -102,12 +111,57 @@ class Search_tree {
 		bool insert( Type const & );
 		bool erase( Type const & );
 
-        void balance();
+
 	// Friends
 
 	template <typename T>
 	friend std::ostream &operator<<( std::ostream &, Search_tree<T> const & );
 };
+
+//////////////////////////////////////////////////////////////////////
+//                Balance Tree Private Member Functions             //
+//////////////////////////////////////////////////////////////////////
+
+template<typename Type>
+void Search_tree<Type>::Node::rotateRight(typename Search_tree<Type>::Node*& curr_node){
+    auto tmp = curr_node->left_tree;
+    curr_node->left_tree = tmp->right_tree;
+    tmp->right_tree = curr_node;
+    curr_node = tmp;
+}
+
+template<typename Type>
+void Search_tree<Type>::Node::rotateLeft(typename Search_tree<Type>::Node*& curr_node){
+    auto tmp = curr_node->right_tree;
+    curr_node->right_tree = tmp->left_tree;
+    tmp->left_tree = curr_node;
+    curr_node = tmp;
+
+}
+template <typename Type>
+void Search_tree<Type>::Node::balance(typename Search_tree<Type>::Node*& curr_node){
+
+    if(curr_node->balanceFactor() < -1){
+       
+        if(curr_node->left_tree->balanceFactor() > 0)
+            rotateLeft(curr_node->left_tree);
+        rotateRight(curr_node);
+
+    }
+    else if(curr_node->balanceFactor() > 1){
+        if(curr_node->right_tree->balanceFactor() < 0)
+            rotateRight(curr_node->right_tree);
+        rotateLeft(curr_node);
+
+    }
+
+    //if(curr_node->right_tree) curr_node->right_tree->update_height();
+    //if(curr_node->left_tree) curr_node->left_tree->update_height();
+
+    //curr_node->update_height();
+ 
+
+}
 
 //////////////////////////////////////////////////////////////////////
 //                Search Tree Public Member Functions               //
@@ -237,6 +291,8 @@ bool Search_tree<Type>::erase( Type const &obj ) {
 	}
 }
 
+
+
 //////////////////////////////////////////////////////////////////////
 //                   Node Public Member Functions                   //
 //////////////////////////////////////////////////////////////////////
@@ -250,6 +306,12 @@ next_node( nullptr ),
 previous_node( nullptr ),
 tree_height( 0 ) {
 	// does nothing
+}
+
+template  <typename Type>
+int Search_tree<Type>::Node::balanceFactor() const{
+    return (this->right_tree ? this->right_tree->tree_height + 1 : 0) - 
+           (this->left_tree ? this->left_tree->tree_height + 1 : 0) ;
 }
 
 template <typename Type>
@@ -311,11 +373,13 @@ bool Search_tree<Type>::Node::insert( Type const &obj, Search_tree<Type>::Node *
 		if ( left_tree == nullptr ) {
 			left_tree = new Search_tree<Type>::Node( obj );
 			update_height();
+            balance(to_this);
 
 			return true;
 		} else {
 			if ( left_tree->insert( obj, left_tree ) ) {
 				update_height();
+                balance(to_this);
 				return true;
 			} else {
 				return false;
@@ -325,11 +389,13 @@ bool Search_tree<Type>::Node::insert( Type const &obj, Search_tree<Type>::Node *
 		if ( right_tree == nullptr ) {
 			right_tree = new Search_tree<Type>::Node( obj );
 			update_height();
+            balance(to_this);
 
 			return true;
 		} else {
 			if ( right_tree->insert( obj, right_tree ) ) {
 				update_height();
+                balance(to_this);
 				return true;
 			} else {
 				return false;
@@ -348,6 +414,7 @@ bool Search_tree<Type>::Node::erase( Type const &obj, Search_tree<Type>::Node *&
 		} else {
 			if ( left_tree->erase( obj, left_tree ) ) {
 				update_height();
+                balance(to_this);
 				return true;
 			}
 
@@ -359,6 +426,7 @@ bool Search_tree<Type>::Node::erase( Type const &obj, Search_tree<Type>::Node *&
 		} else {
 			if ( right_tree->erase( obj, right_tree ) ) {
 				update_height();
+                balance(to_this);
 				return true;
 			}
 
@@ -380,6 +448,7 @@ bool Search_tree<Type>::Node::erase( Type const &obj, Search_tree<Type>::Node *&
 			node_value = right_tree->front()->node_value;
 			right_tree->erase( node_value, right_tree );
 			update_height();
+            balance(to_this);
 		}
 
 		return true;
