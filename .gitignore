@@ -10,3 +10,6 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 Project-0/a.out
+Project-1/a.out
+Project-2/a.out
+Project-3/a.out
