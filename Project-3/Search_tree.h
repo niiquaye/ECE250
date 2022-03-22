@@ -47,8 +47,6 @@ class Search_tree {
 				Node *back();
 				Node *find( Type const &obj );
 
-                int balanceFactor() const;
-
 				void clear();
 				bool insert( Type const &obj, Node *&to_this );
 				bool erase( Type const &obj, Node *&to_this );
@@ -58,6 +56,7 @@ class Search_tree {
                 void balance(Node*& curr_node);
                 void rotateRight(Node*& curr_node);
                 void rotateLeft(Node*& curr_node);
+                int balanceFactor() const;
 
 		};
 
@@ -155,10 +154,10 @@ void Search_tree<Type>::Node::balance(typename Search_tree<Type>::Node*& curr_no
 
     }
 
-    //if(curr_node->right_tree) curr_node->right_tree->update_height();
-    //if(curr_node->left_tree) curr_node->left_tree->update_height();
+    if(curr_node->right_tree) curr_node->right_tree->update_height();
+    if(curr_node->left_tree) curr_node->left_tree->update_height();
 
-    //curr_node->update_height();
+    curr_node->update_height();
  
 
 }
@@ -174,8 +173,12 @@ root_node( nullptr ),
 tree_size( 0 ),
 front_sentinel( new Search_tree::Node( Type() ) ),
 back_sentinel( new Search_tree::Node( Type() ) ) {
+    // set sentinel nodes to point to each other on creation
 	front_sentinel->next_node = back_sentinel;
+    front_sentinel->previous_node = nullptr;
+
 	back_sentinel->previous_node = front_sentinel;
+    back_sentinel->next_node = nullptr;
 }
 
 template <typename Type>
@@ -269,11 +272,19 @@ void Search_tree<Type>::clear() {
 template <typename Type>
 bool Search_tree<Type>::insert( Type const &obj ) {
 	if ( empty() ) {
+        // if tree is empty manually add the new node to the doubly sentinel linked list
+        // and increment size to 1
 		root_node = new Search_tree::Node( obj );
 		tree_size = 1;
 
+        this->front_sentinel->next_node = root_node;
+        this->back_sentinel->previous_node = root_node;
+        this->root_node->next_node = this->back_sentinel;
+        this->root_node->previous_node = this->front_sentinel;
+
 		return true;
-	} else if ( root_node->insert( obj, root_node ) ) {
+	} else if ( root_node->insert( obj, root_node ) ) { // recursively insert subsequent nodes into the tree
+        // increment tree size
 		++tree_size;
 		return true;
 	} else {
@@ -307,18 +318,21 @@ previous_node( nullptr ),
 tree_height( 0 ) {
 	// does nothing
 }
-
+// calculate balance of a given node 
+// this balance will be used to determine if the current 
+// BST is left or right heavy and in need of rotation
 template  <typename Type>
 int Search_tree<Type>::Node::balanceFactor() const{
     return (this->right_tree ? this->right_tree->tree_height + 1 : 0) - 
            (this->left_tree ? this->left_tree->tree_height + 1 : 0) ;
 }
 
+// update height of of current node
 template <typename Type>
 void Search_tree<Type>::Node::update_height() {
 	tree_height = std::max( left_tree->height(), right_tree->height() ) + 1;
 }
-
+// return height of current node in BST
 template <typename Type>
 int Search_tree<Type>::Node::height() const {
 	return ( this == nullptr ) ? -1 : tree_height;
@@ -341,7 +355,7 @@ template <typename Type>
 typename Search_tree<Type>::Node *Search_tree<Type>::Node::back() {
 	return ( right_tree == nullptr ) ? this : right_tree->back();
 }
-
+// recursively search for a node in a BST
 template <typename Type>
 typename Search_tree<Type>::Node *Search_tree<Type>::Node::find( Type const &obj ) {
 	if ( obj == node_value ) {
@@ -367,6 +381,9 @@ void Search_tree<Type>::Node::clear() {
 	delete this;
 }
 
+// recursviely insert new nodes into the BST,
+// furthermore, insert nodes into the sentinel doubly linked list
+// that will be used for iterating the BST
 template <typename Type>
 bool Search_tree<Type>::Node::insert( Type const &obj, Search_tree<Type>::Node *&to_this ) {
 	if ( obj < node_value ) {
@@ -374,6 +391,14 @@ bool Search_tree<Type>::Node::insert( Type const &obj, Search_tree<Type>::Node *
 			left_tree = new Search_tree<Type>::Node( obj );
 			update_height();
             balance(to_this);
+            
+
+            to_this->previous_node->next_node = left_tree;
+            left_tree->previous_node = to_this->previous_node;
+
+
+            to_this->previous_node = left_tree;
+            left_tree->next_node = to_this;
 
 			return true;
 		} else {
@@ -391,11 +416,20 @@ bool Search_tree<Type>::Node::insert( Type const &obj, Search_tree<Type>::Node *
 			update_height();
             balance(to_this);
 
+            to_this->next_node->previous_node = right_tree;
+            right_tree->previous_node = to_this;
+
+            right_tree->next_node = to_this->next_node;
+            to_this->next_node = right_tree;
+
+
+
 			return true;
 		} else {
 			if ( right_tree->insert( obj, right_tree ) ) {
 				update_height();
                 balance(to_this);
+
 				return true;
 			} else {
 				return false;
@@ -406,6 +440,8 @@ bool Search_tree<Type>::Node::insert( Type const &obj, Search_tree<Type>::Node *
 	}
 }
 
+// remove nodes from the BST, whilst also removing the nodes from the doubly sentinel
+// linked list
 template <typename Type>
 bool Search_tree<Type>::Node::erase( Type const &obj, Search_tree<Type>::Node *&to_this ) {
 	if ( obj < node_value ) {
@@ -435,16 +471,24 @@ bool Search_tree<Type>::Node::erase( Type const &obj, Search_tree<Type>::Node *&
 	} else {
 		assert( obj == node_value );
 
+        // update links in doubly linked list to reflect a deletion in the linked list
 		if ( is_leaf() ) {
-			to_this = nullptr;
+            to_this->next_node->previous_node = to_this->previous_node;
+            to_this->previous_node->next_node = to_this->next_node;
+            to_this = nullptr;
 			delete this;
 		} else if ( left_tree == nullptr ) {
+            to_this->next_node->previous_node = to_this->previous_node;
+            to_this->previous_node->next_node = to_this->next_node;
 			to_this = right_tree;
 			delete this;
 		} else if ( right_tree == nullptr ) {
+            to_this->next_node->previous_node = to_this->previous_node;
+            to_this->previous_node->next_node = to_this->next_node;
 			to_this = left_tree;
 			delete this;
 		} else {
+            // recursively call erase when it is a parent node with two children
 			node_value = right_tree->front()->node_value;
 			right_tree->erase( node_value, right_tree );
 			update_height();
@@ -482,7 +526,8 @@ typename Search_tree<Type>::Iterator &Search_tree<Type>::Iterator::operator++() 
 	// Update the current node to the node containing the next higher value
 	// If we are already at end do nothing
 
-	// Your implementation here, do not change the return value
+    // set current node to the next node in the linked list
+    this->current_node = (current_node->next_node != nullptr) ? current_node->next_node : this->current_node;
 
 	return *this;
 }
@@ -492,7 +537,8 @@ typename Search_tree<Type>::Iterator &Search_tree<Type>::Iterator::operator--() 
 	// Update the current node to the node containing the next smaller value
 	// If we are already at either rend, do nothing
 
-	// Your implementation here, do not change the return value
+    // set current node to previous node 
+    this->current_node = (current_node->previous_node != nullptr) ? current_node->previous_node : this->current_node;
 
 	return *this;
 }
