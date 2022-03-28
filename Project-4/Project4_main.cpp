@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <string>
 #include <unordered_map>
-#include <map>
 #include <unordered_set>
 #include <vector>
 #include <stack>
@@ -20,6 +19,7 @@ using graph_t =  std::unordered_map<std::string, std::vector<std::string>>;
 static graph_t adjacency_list {};
 static std::unordered_set<std::string> visited {};
 
+// operator overload of the << operator for printing adjacency lists
 static std::ostream& operator<<(std::ostream& out, graph_t const& graph)
 {
 
@@ -36,6 +36,8 @@ static std::ostream& operator<<(std::ostream& out, graph_t const& graph)
     return out;
 }
 
+// helper function to parse individual lines extracted from
+// the input file
 inline static std::string parse(const std::string& line){
     std::string node_name {};
     if(line.at(0) != NUMBER_SIGN){
@@ -52,7 +54,9 @@ inline static std::string parse(const std::string& line){
 
 }
 
-static void dfs(const graph_t& graph, std::unordered_set<std::string>& visited, std::stack<std::string>& st, const std::string& curr_node){
+// helper function that runs DFS that generates a topological sort by putting nodes into a stack
+// when it backtracks. The function populates the 'st' with a topological sort of the graph
+static void dfs( graph_t& graph, std::unordered_set<std::string>& visited, std::stack<std::string>& st, const std::string& curr_node){
 
     visited.insert(curr_node);
 
@@ -65,24 +69,29 @@ static void dfs(const graph_t& graph, std::unordered_set<std::string>& visited, 
 
          }
 
-         st.push(curr_node);
-
     }
-
+    st.push(curr_node);
 
 
 
 }
 
-static std::vector<std::string> Kahns_topological_sort(const graph_t& graph){
+// topological sort - runs a dfs over every node while generating 
+// the toplogical sort by the stack that is passed by reference into the
+// 'dfs' helper function. The topological sort is extracted from the stack
+// and populates the return vector with the topological sort. 
+static std::vector<std::string> topological_sort(graph_t& graph){
 
     std::vector<std::string> top_sort {};
     std::unordered_set<std::string> visited {};
     std::stack<std::string> stack {};
 
-    for(const auto& nodes : graph)
-        dfs(graph, visited, stack, nodes.first);
+    for(const auto& nodes : graph){
+       if(visited.find(nodes.first) == visited.end()) 
+          dfs(graph, visited, stack, nodes.first);
 
+    }
+   
     while(!stack.empty()){
           top_sort.push_back(stack.top());
           stack.pop();
@@ -105,35 +114,41 @@ int main(int argc, char** argv)
 	}
 
     // construct graph
-
 	std::string line;
     std::string node_name {};
     std::string neighbour {};
+    std::unordered_set<std::string> set {};
+    // parse file to get node names
 	while(std::getline(fin,line))
 	{
         
-//       if(line.at(0) != NUMBER_SIGN){
-//          node_name = parse(line);
-//          adjacency_list.insert({node_name, {}});
-//          continue;
-//        }else{
-//          neighbour = parse(line);
-//        }
-
-
-        adjacency_list.at(node_name).push_back(neighbour);
+        auto node_name = parse(line);
+        if(set.find(node_name) == set.end()){
+           adjacency_list.insert({node_name, {}});
+           set.insert(node_name);
+        }
 
 	}
 
+    std::string child {};
+	std::ifstream in(fileName);
+    // parse file to get parent - child relation
+    while(std::getline(in, line))
+    {
+
+       if(line.at(0) != NUMBER_SIGN){
+         child = parse(line);
+         continue;
+       }
+       adjacency_list.at(parse(line)).push_back(child);
+    }
+
     std::cout << adjacency_list << std::endl;
+    // topological sorting algorithm
+    auto top_sort = topological_sort(adjacency_list);
 
-    // Kahn's Topological sorting algorithm
-
-    auto top_sort = Kahns_topological_sort(adjacency_list);
-
-    // print out to the console
-
-    for(const auto& node : top_sort)
+   // print out topological sort the console
+   for(const auto& node : top_sort)
         std::cout << node << std::endl;
 
 
